@@ -1,0 +1,107 @@
+{% extends 'medicine/base.html' %}
+
+{% load custom_filters %}
+
+
+{% block title %}Expiry Alerts - Pharmacy Inventory System{% endblock %}
+
+{% block page_title %}Expiry Alerts{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Expiry Alerts</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<!-- Expired Medicines -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-danger text-white">
+        <h6 class="m-0 font-weight-bold">Expired Medicines</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Medicine</th>
+                        <th>Batch Number</th>
+                        <th>Expiry Date</th>
+                        <th>Days Expired</th>
+                        <th>Quantity</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for batch in expired_batches %}
+                    <tr>
+                        <td>{{ batch.medicine.name }}</td>
+                        <td>{{ batch.batch_number }}</td>
+                        <td class="text-danger">{{ batch.expiry_date|date:"M d, Y" }}</td>
+                        <td class="text-danger">{{ batch.days_to_expiry|abs_value }} days</td>
+                        <td>{{ batch.current_quantity }}</td>
+                        <td>
+                            <a href="/" class="btn btn-sm btn-info">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No expired medicines found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Medicines Expiring Soon -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-warning text-dark">
+        <h6 class="m-0 font-weight-bold">Medicines Expiring Soon (Next 30 Days)</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Medicine</th>
+                        <th>Batch Number</th>
+                        <th>Expiry Date</th>
+                        <th>Days Left</th>
+                        <th>Quantity</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for batch in expiring_soon_batches %}
+                    <tr>
+                        <td>{{ batch.medicine.name }}</td>
+                        <td>{{ batch.batch_number }}</td>
+                        <td>{{ batch.expiry_date|date:"M d, Y" }}</td>
+                        <td class="{% if batch.days_to_expiry <= 7 %}text-danger{% elif batch.days_to_expiry <= 15 %}text-warning{% endif %}">
+                            {{ batch.days_to_expiry }} days
+                        </td>
+                        <td>{{ batch.current_quantity }}</td>
+                        <td>
+                            <a href="/" class="btn btn-sm btn-info">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No medicines expiring soon.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'medicine/base.html' %}
+
+{% block title %}{% if form.instance.id %}Edit {% else %}Add {% endif %}Medicine - Pharmacy Inventory System{% endblock %}
+
+{% block page_title %}{% if form.instance.id %}Edit Medicine: {{ form.instance.name }}{% else %}Add New Medicine{% endif %}{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'medicine_list' %}">Medicines</a></li>
+        {% if form.instance.id %}
+        <li class="breadcrumb-item"><a href="{% url 'medicine_detail' pk=form.instance.id %}">{{ form.instance.name }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Edit</li>
+        {% else %}
+        <li class="breadcrumb-item active" aria-current="page">Add New</li>
+        {% endif %}
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">{% if form.instance.id %}Edit Medicine Details{% else %}Medicine Information{% endif %}</h6>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="{{ form.name.id_for_label }}" class="form-label">Name*</label>
+                    <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" class="form-control" value="{{ form.name.value|default:'' }}" required>
+                    {% if form.name.errors %}
+                    <div class="text-danger">{{ form.name.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.generic_name.id_for_label }}" class="form-label">Generic Name</label>
+                    <input type="text" name="{{ form.generic_name.name }}" id="{{ form.generic_name.id_for_label }}" class="form-control" value="{{ form.generic_name.value|default:'' }}">
+                    {% if form.generic_name.errors %}
+                    <div class="text-danger">{{ form.generic_name.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
+                    <input type="text" name="{{ form.category.name }}" id="{{ form.category.id_for_label }}" class="form-control" value="{{ form.category.value|default:'' }}">
+                    {% if form.category.errors %}
+                    <div class="text-danger">{{ form.category.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="{{ form.supplier.id_for_label }}" class="form-label">Supplier</label>
+                    <input type="text" name="{{ form.supplier.name }}" id="{{ form.supplier.id_for_label }}" class="form-control" value="{{ form.supplier.value|default:'' }}">
+                    {% if form.supplier.errors %}
+                    <div class="text-danger">{{ form.supplier.errors }}</div>
+                    {% endif %}
+                </div>
+                
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="{{ form.minimum_stock.id_for_label }}" class="form-label">Minimum Stock*</label>
+                    <input type="number" name="{{ form.minimum_stock.name }}" id="{{ form.minimum_stock.id_for_label }}" class="form-control" value="{{ form.minimum_stock.value|default:'10' }}" required>
+                    {% if form.minimum_stock.errors %}
+                    <div class="text-danger">{{ form.minimum_stock.errors }}</div>
+                    {% endif %}
+                    <small class="form-text text-muted">Set the minimum quantity at which you want to be alerted.</small>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                <textarea name="{{ form.description.name }}" id="{{ form.description.id_for_label }}" class="form-control" rows="3">{{ form.description.value|default:'' }}</textarea>
+                {% if form.description.errors %}
+                <div class="text-danger">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{% if form.instance.id %}{% url 'medicine_detail' pk=form.instance.id %}{% else %}{% url 'medicine_list' %}{% endif %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

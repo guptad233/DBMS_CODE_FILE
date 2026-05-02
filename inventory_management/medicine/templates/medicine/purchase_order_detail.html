@@ -1,0 +1,146 @@
+{% extends 'medicine/base.html' %}
+
+{% block title %}Purchase Order - {{ purchase_order.order_number }}{% endblock %}
+
+{% block page_title %}Purchase Order: {{ purchase_order.order_number }}{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'purchase_order_list' %}">Purchase Orders</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ purchase_order.order_number }}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group">
+    <button class="btn btn-primary" onclick="window.print()">
+        <i class="bi bi-printer"></i> Print
+    </button>
+    {% if purchase_order.status == 'ordered' %}
+    <a href="{% url 'receive_purchase_order' pk=purchase_order.pk %}" class="btn btn-success">
+        <i class="bi bi-box-arrow-in-down"></i> Receive Order
+    </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Order Information</h6>
+            <span class="badge 
+                {% if purchase_order.status == 'pending' %}bg-warning text-dark
+                {% elif purchase_order.status == 'ordered' %}bg-primary
+                {% elif purchase_order.status == 'received' %}bg-success
+                {% elif purchase_order.status == 'cancelled' %}bg-danger
+                {% endif %}">
+                {{ purchase_order.get_status_display }}
+            </span>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="fw-bold">Order Number:</label>
+                    <p>{{ purchase_order.order_number }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Supplier:</label>
+                    <p>{{ purchase_order.supplier.name }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Supplier Contact:</label>
+                    <p>{{ purchase_order.supplier.contact_person|default:"N/A" }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Supplier Phone:</label>
+                    <p>{{ purchase_order.supplier.phone|default:"N/A" }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Supplier Email:</label>
+                    <p>{{ purchase_order.supplier.email|default:"N/A" }}</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="fw-bold">Order Date:</label>
+                    <p>{{ purchase_order.order_date|date:"F d, Y" }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Expected Delivery Date:</label>
+                    <p>{{ purchase_order.expected_delivery_date|date:"F d, Y"|default:"Not specified" }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Status:</label>
+                    <p>
+                        <span class="badge 
+                            {% if purchase_order.status == 'pending' %}bg-warning text-dark
+                            {% elif purchase_order.status == 'ordered' %}bg-primary
+                            {% elif purchase_order.status == 'received' %}bg-success
+                            {% elif purchase_order.status == 'cancelled' %}bg-danger
+                            {% endif %}">
+                            {{ purchase_order.get_status_display }}
+                        </span>
+                    </p>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Notes:</label>
+                    <p>{{ purchase_order.notes|default:"No notes" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Order Items</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Medicine</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in purchase_order.items.all %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><a href="{% url 'medicine_detail' pk=item.medicine.pk %}">{{ item.medicine.name }}</a></td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{% if item.unit_price %}${{ item.unit_price }}{% else %}Not specified{% endif %}</td>
+                        <td>{% if item.unit_price %}${{ item.quantity|floatformat:"2" }}{% else %}Not specified{% endif %}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No items in this order</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-end fw-bold">Total:</td>
+                        <td class="fw-bold">
+                            {% if purchase_order.items.all %}
+                            ${{ purchase_order.items.all.0 }}
+                            {% else %}
+                            $0.00
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
