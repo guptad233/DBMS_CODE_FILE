@@ -1,0 +1,146 @@
+{% extends 'medicine/base.html' %}
+
+{% block title %}Register - Pharmacy Inventory System{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .auth-card {
+        max-width: 500px;
+        margin: 50px auto;
+        border-radius: 10px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .auth-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 20px;
+        border-radius: 10px 10px 0 0;
+        text-align: center;
+    }
+    .auth-body {
+        padding: 30px;
+    }
+    .form-floating {
+        margin-bottom: 15px;
+    }
+    .auth-footer {
+        text-align: center;
+        padding: 15px;
+        border-top: 1px solid #e3e6f0;
+    }
+    .btn-auth {
+        width: 100%;
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    .btn-auth:hover {
+        background-color: #1565C0;
+        border-color: #1565C0;
+    }
+    .auth-links {
+        margin-top: 15px;
+        text-align: center;
+    }
+    .auth-links a {
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+    .auth-links a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card auth-card">
+        <div class="auth-header">
+            <h3 class="m-0"><i class="bi bi-capsule me-2"></i>PharmTrack</h3>
+            <p class="mt-2 mb-0">Create a new account</p>
+        </div>
+        <div class="auth-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form.first_name }}
+                            <label for="{{ form.first_name.id_for_label }}">First Name</label>
+                            {% if form.first_name.errors %}
+                            <div class="text-danger small">{{ form.first_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            {{ form.last_name }}
+                            <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+                            {% if form.last_name.errors %}
+                            <div class="text-danger small">{{ form.last_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-floating mb-3">
+                    {{ form.email }}
+                    <label for="{{ form.email.id_for_label }}">Email Address</label>
+                    {% if form.email.errors %}
+                    <div class="text-danger small">{{ form.email.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-floating mb-3">
+                    {{ form.password1 }}
+                    <label for="{{ form.password1.id_for_label }}">Password</label>
+                    {% if form.password1.errors %}
+                    <div class="text-danger small">{{ form.password1.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-floating mb-3">
+                    {{ form.password2 }}
+                    <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+                    {% if form.password2.errors %}
+                    <div class="text-danger small">{{ form.password2.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-auth">Register</button>
+                </div>
+                
+                <div class="auth-links">
+                    <div>
+                        Already have an account? <a href="{% url 'login' %}">Login</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="auth-footer">
+            <p class="m-0 text-muted small">© 2025 PharmTrack. All rights reserved.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

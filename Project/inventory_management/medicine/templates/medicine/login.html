@@ -1,0 +1,118 @@
+{% extends 'medicine/base.html' %}
+
+{% block title %}Login - Pharmacy Inventory System{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .auth-card {
+        max-width: 450px;
+        margin: 50px auto;
+        border-radius: 10px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .auth-header {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 20px;
+        border-radius: 10px 10px 0 0;
+        text-align: center;
+    }
+    .auth-body {
+        padding: 30px;
+    }
+    .form-floating {
+        margin-bottom: 15px;
+    }
+    .auth-footer {
+        text-align: center;
+        padding: 15px;
+        border-top: 1px solid #e3e6f0;
+    }
+    .btn-auth {
+        width: 100%;
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    .btn-auth:hover {
+        background-color: #1565C0;
+        border-color: #1565C0;
+    }
+    .auth-links {
+        margin-top: 15px;
+        text-align: center;
+    }
+    .auth-links a {
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+    .auth-links a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card auth-card">
+        <div class="auth-header">
+            <h3 class="m-0"><i class="bi bi-capsule me-2"></i>PharmTrack</h3>
+            <p class="mt-2 mb-0">Sign in to your account</p>
+        </div>
+        <div class="auth-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-floating">
+                    {{ form.username }}
+                    <label for="{{ form.username.id_for_label }}">Email address</label>
+                    {% if form.username.errors %}
+                    <div class="text-danger small">{{ form.username.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-floating">
+                    {{ form.password }}
+                    <label for="{{ form.password.id_for_label }}">Password</label>
+                    {% if form.password.errors %}
+                    <div class="text-danger small">{{ form.password.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-auth">Login</button>
+                </div>
+                
+                <div class="auth-links">
+                    
+                    <div>
+                        Don't have an account? <a href="{% url 'register' %}">Register</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="auth-footer">
+            <p class="m-0 text-muted small">© 2025 PharmTrack. All rights reserved.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

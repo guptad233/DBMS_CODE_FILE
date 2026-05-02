@@ -1,0 +1,83 @@
+{% extends 'medicine/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Create Purchase Order</h2>
+
+    <form method="post" novalidate id="order-form">
+        {% csrf_token %}
+
+        <div class="card mb-3 p-3">
+            <h5>Order Details</h5>
+            {{ form|crispy }}
+        </div>
+
+        <div class="card mb-3 p-3">
+            <h5>Order Items</h5>
+            {{ formset.management_form }}
+
+            <div id="formset-container">
+                {% for form in formset %}
+                    <div class="formset-item border rounded p-3 mb-2">
+                        {% for hidden in form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+                        {% for field in form.visible_fields %}
+                            <div class="form-group">
+                                {{ field.label_tag }}
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="text-danger">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        <button type="button" class="btn btn-danger remove-form mt-2">Remove</button>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button type="button" class="btn btn-secondary mt-2" id="add-form">Add Item</button>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('formset-container');
+        const addBtn = document.getElementById('add-form');
+        const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+
+        addBtn.addEventListener('click', function () {
+            const currentFormCount = parseInt(totalForms.value);
+            const formCopy = container.querySelector('.formset-item').cloneNode(true);
+            const regex = new RegExp(`form-(\\d){1,}`, 'g');
+
+            formCopy.innerHTML = formCopy.innerHTML.replace(regex, `form-${currentFormCount}`);
+            
+            // Clear input values
+            formCopy.querySelectorAll('input, select, textarea').forEach(input => {
+                if (input.type !== 'hidden') input.value = '';
+            });
+
+            container.appendChild(formCopy);
+            totalForms.value = currentFormCount + 1;
+        });
+
+        container.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-form')) {
+                const allForms = container.querySelectorAll('.formset-item');
+                if (allForms.length > 1) {
+                    e.target.closest('.formset-item').remove();
+                    totalForms.value = allForms.length - 1;
+                } else {
+                    alert('At least one item is required.');
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock %}

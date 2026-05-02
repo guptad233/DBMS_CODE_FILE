@@ -1,0 +1,60 @@
+{% extends 'medicine/base.html' %}
+
+{% block title %}Low Stock Alerts - Pharmacy Inventory System{% endblock %}
+
+{% block page_title %}Low Stock Alerts{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Low Stock Alerts</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3 bg-danger text-white">
+        <h6 class="m-0 font-weight-bold">Medicines Below Minimum Stock Level</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Medicine</th>
+                        
+                        <th>Current Stock</th>
+                        <th>Minimum Stock</th>
+                        <th>Supplier</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for medicine in low_stock_medicines %}
+                    <tr>
+                        <td><a href="/">{{ medicine.name }}</a></td>
+                        
+                        <td class="text-danger fw-bold">{{ medicine.current_stock }}</td>
+                        <td>{{ medicine.minimum_stock }}</td>
+                        <td>{{ medicine.supplier }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{% url 'add_medicine_batch' medicine_id=medicine.id %}" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-cart-plus"></i> Order
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No medicines with low stock found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

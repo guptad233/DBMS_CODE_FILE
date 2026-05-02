@@ -1,0 +1,258 @@
+{% extends 'medicine/base.html' %}
+
+{% block title %}Record Sale - Pharmacy Inventory System{% endblock %}
+
+{% block page_title %}Record New Sale{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'sale_list' %}">Sales</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Record New Sale</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .formset-row {
+        border-bottom: 1px solid #e3e6f0;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .delete-row {
+        color: var(--danger-color);
+        cursor: pointer;
+    }
+    
+    /* Hide Django's default field for Delete */
+    .form-check-DELETE {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Create New Sale</h2>
+
+    <form method="POST" id="sale-form">
+        {% csrf_token %}
+
+        <!-- Sale info -->
+        <div class="mb-3">
+            <label for="id_invoice_number" class="form-label">Invoice Number</label>
+            <input type="text" name="invoice_number" id="id_invoice_number" class="form-control" value="{{ form.invoice_number.value|default_if_none:'' }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="id_sale_date" class="form-label">Sale Date</label>
+            <input type="datetime-local" name="sale_date" id="id_sale_date" class="form-control" value="{{ form.sale_date.value|default_if_none:'' }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="id_customer_name" class="form-label">Customer Name</label>
+            <input type="text" name="customer_name" id="id_customer_name" class="form-control" value="{{ form.customer_name.value|default_if_none:'' }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="id_customer_phone" class="form-label">Customer Phone</label>
+            <input type="text" name="customer_phone" id="id_customer_phone" class="form-control" value="{{ form.customer_phone.value|default_if_none:'' }}">
+        </div>
+
+        <hr>
+
+        <!-- Sale Items -->
+        <h4>Sale Items</h4>
+
+        {{ formset.management_form }}
+
+        <div id="formset-container">
+            {% for form in formset %}
+            <div class="row mb-3 border p-3 rounded formset-row">
+                <div class="col-md-5">
+                    <label for="id_items-{{ forloop.counter0 }}-medicine_batch" class="form-label">Medicine Batch</label>
+                    {{ form.medicine_batch }}
+                </div>
+                <div class="col-md-3">
+                    <label for="id_items-{{ forloop.counter0 }}-quantity" class="form-label">Quantity</label>
+                    {{ form.quantity }}
+                </div>
+                <div class="col-md-3">
+                    <label for="id_items-{{ forloop.counter0 }}-price" class="form-label">Price</label>
+                    {{ form.price }}
+                </div>
+                <div class="col-md-1">
+                    <a href="#" class="btn btn-danger delete-row" {% if forloop.first %}style="visibility: hidden;"{% endif %}>
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <button type="button" id="add-item" class="btn btn-success">
+                    <i class="bi bi-plus"></i> Add Item
+                </button>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6 offset-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <h6 class="font-weight-bold">Total Amount:</h6>
+                            <div>$<span id="total-amount">0.00</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'sale_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Sale</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        const emptyForm = $('#formset-container .formset-row:first').clone(true);
+
+        function updateFormIndices() {
+            $('#formset-container .formset-row').each(function(index) {
+                $(this).find(':input').each(function() {
+                    if ($(this).attr('id')) {
+                        let newID = $(this).attr('id').replace(/-\d+-/, `-${index}-`);
+                        $(this).attr('id', newID);
+                    }
+                    if ($(this).attr('name')) {
+                        let newName = $(this).attr('name').replace(/-\d+-/, `-${index}-`);
+                        $(this).attr('name', newName);
+                    }
+                });
+                
+                if (index === 0 && $('#formset-container .formset-row:visible').length === 1) {
+                    $(this).find('.delete-row').css('visibility', 'hidden');
+                } else {
+                    $(this).find('.delete-row').css('visibility', 'visible');
+                }
+            });
+
+            $('#id_form-TOTAL_FORMS').val($('#formset-container .formset-row').length);
+        }
+
+        function calculateSubtotal(row) {
+            const quantity = parseFloat($(row).find('.item-quantity').val()) || 0;
+            const price = parseFloat($(row).find('.item-price').val()) || 0;
+            const subtotal = quantity * price;
+            $(row).find('.item-subtotal').val(subtotal.toFixed(2));
+            return subtotal;
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            $('#formset-container .formset-row:visible').each(function() {
+                total += calculateSubtotal(this);
+            });
+            $('#total-amount').text(total.toFixed(2));
+            return total;
+        }
+
+        $(document).on('input', '.item-quantity, .item-price', function() {
+            calculateTotal();
+        });
+
+        $('#add-item').click(function(e) {
+            e.preventDefault();
+
+            let formCount = parseInt($('#id_form-TOTAL_FORMS').val());
+            let newForm = emptyForm.clone(true);
+            newForm.find(':input').each(function() {
+                if ($(this).attr('id')) {
+                    let newID = $(this).attr('id').replace(/-\d+-/, `-${formCount}-`);
+                    $(this).attr('id', newID);
+                }
+                if ($(this).attr('name')) {
+                    let newName = $(this).attr('name').replace(/-\d+-/, `-${formCount}-`);
+                    $(this).attr('name', newName);
+                }
+
+                if (!$(this).attr('type') || $(this).attr('type') !== 'hidden') {
+                    if ($(this).hasClass('item-quantity')) {
+                        $(this).val('1');
+                    } else if ($(this).hasClass('item-price')) {
+                        $(this).val('0.00');
+                    } else {
+                        $(this).val('');
+                    }
+                }
+            });
+
+            $('.delete-row').css('visibility', 'visible');
+            $('#formset-container').append(newForm);
+            $('#id_form-TOTAL_FORMS').val(formCount + 1);
+            calculateTotal();
+        });
+
+        $(document).on('click', '.delete-row', function(e) {
+            e.preventDefault();
+            const row = $(this).closest('.formset-row');
+            if (row.find('input[name$="-id"]').val()) {
+                row.find('input[name$="-DELETE"]').prop('checked', true);
+                row.hide();
+            } else {
+                row.remove();
+            }
+
+            if ($('#formset-container .formset-row:visible').length === 1) {
+                $('#formset-container .formset-row:visible').find('.delete-row').css('visibility', 'hidden');
+            }
+
+            updateFormIndices();
+            calculateTotal();
+        });
+
+        $('#sale-form').on('submit', function(e) {
+            let isValid = true;
+            let errors = [];
+
+            const requiredFields = [
+                { field: '#id_invoice_number', name: 'Invoice Number' },
+                { field: '#id_sale_date', name: 'Sale Date' }
+            ];
+
+            requiredFields.forEach(item => {
+                const field = $(item.field);
+                if (!field.val()) {
+                    field.addClass('is-invalid');
+                    errors.push(`${item.name} is required.`);
+                    isValid = false;
+                } else {
+                    field.removeClass('is-invalid');
+                }
+            });
+
+            if ($('#formset-container .formset-row:visible').length < 1) {
+                alert('At least one item must be added to the sale.');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                alert(errors.join('\n'));
+            }
+        });
+
+        updateFormIndices();
+        calculateTotal();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'medicine/base.html' %}
+
+{% block title %}Sale Details - {{ sale.invoice_number }}{% endblock %}
+
+{% block page_title %}Sale Details: {{ sale.invoice_number }}{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'sale_list' %}">Sales</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ sale.invoice_number }}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block page_actions %}
+<button class="btn btn-primary" onclick="window.print()">
+    <i class="bi bi-printer"></i> Print Invoice
+</button>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Invoice Information</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="fw-bold">Invoice Number:</label>
+                    <p>{{ sale.invoice_number }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Date:</label>
+                    <p>{{ sale.sale_date|date:"F d, Y H:i" }}</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="fw-bold">Customer Name:</label>
+                    <p>{{ sale.customer_name|default:"Walk-in Customer" }}</p>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Customer Phone:</label>
+                    <p>{{ sale.customer_phone|default:"N/A" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Sale Items</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Item</th>
+                        <th>Batch</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in sale.items.all %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ item.medicine_batch.medicine.name }}</td>
+                        <td>{{ item.medicine_batch.batch_number }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ item.price }}</td>
+                        <td>${{ item.quantity|floatformat:"2" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="text-end fw-bold">Total:</td>
+                        <td class="fw-bold">${{ sale.total_amount }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'medicine/base.html' %}
+
+{% block title %}Add Batch - Pharmacy Inventory System{% endblock %}
+
+{% block page_title %}Add New Batch{% if medicine %}: {{ medicine.name }}{% endif %}{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'medicine_list' %}">Medicines</a></li>
+        {% if medicine %}
+        <li class="breadcrumb-item"><a href="/">{{ medicine.name }}</a></li>
+        {% endif %}
+        <li class="breadcrumb-item active" aria-current="page">Add Batch</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Batch Information</h6>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if not medicine %}
+            <div class="mb-3">
+                <label for="{{ form.medicine.id_for_label }}" class="form-label">Medicine*</label>
+                <select name="{{ form.medicine.name }}" id="{{ form.medicine.id_for_label }}" class="form-control" required>
+                    <option value="">---------</option>
+                    {% for choice in form.medicine.field.choices %}
+                    <option value="{{ choice.0 }}" {% if form.medicine.value|stringformat:'s' == choice.0|stringformat:'s' %}selected{% endif %}>{{ choice.1 }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.medicine.errors %}
+                <div class="text-danger">{{ form.medicine.errors }}</div>
+                {% endif %}
+            </div>
+            {% else %}
+                <input type="hidden" name="{{ form.medicine.name }}" value="{{ medicine.id }}">
+            {% endif %}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="{{ form.batch_number.id_for_label }}" class="form-label">Batch Number*</label>
+                    <input type="text" name="{{ form.batch_number.name }}" id="{{ form.batch_number.id_for_label }}" class="form-control" value="{{ form.batch_number.value|default:'' }}" required>
+                    {% if form.batch_number.errors %}
+                    <div class="text-danger">{{ form.batch_number.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.quantity_received.id_for_label }}" class="form-label">Quantity Received*</label>
+                    <input type="number" name="{{ form.quantity_received.name }}" id="{{ form.quantity_received.id_for_label }}" class="form-control" value="{{ form.quantity_received.value|default:'' }}" required>
+                    {% if form.quantity_received.errors %}
+                    <div class="text-danger">{{ form.quantity_received.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="{{ form.manufacturing_date.id_for_label }}" class="form-label">Manufacturing Date*</label>
+                    <input type="date" name="{{ form.manufacturing_date.name }}" id="{{ form.manufacturing_date.id_for_label }}" class="form-control" value="{{ form.manufacturing_date.value|date:'Y-m-d'|default:'' }}" required>
+                    {% if form.manufacturing_date.errors %}
+                    <div class="text-danger">{{ form.manufacturing_date.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.expiry_date.id_for_label }}" class="form-label">Expiry Date*</label>
+                    <input type="date" name="{{ form.expiry_date.name }}" id="{{ form.expiry_date.id_for_label }}" class="form-control" value="{{ form.expiry_date.value|date:'Y-m-d'|default:'' }}" required>
+                    {% if form.expiry_date.errors %}
+                    <div class="text-danger">{{ form.expiry_date.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="{{ form.purchase_price.id_for_label }}" class="form-label">Purchase Price*</label>
+                    <div class="input-group">
+                        <span class="input-group-text">Rs</span>
+                        <input type="number" step="0.01" name="{{ form.purchase_price.name }}" id="{{ form.purchase_price.id_for_label }}" class="form-control" value="{{ form.purchase_price.value|default:'' }}" required>
+                    </div>
+                    {% if form.purchase_price.errors %}
+                    <div class="text-danger">{{ form.purchase_price.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label for="{{ form.selling_price.id_for_label }}" class="form-label">Selling Price*</label>
+                    <div class="input-group">
+                        <span class="input-group-text">Rs</span>
+                        <input type="number" step="0.01" name="{{ form.selling_price.name }}" id="{{ form.selling_price.id_for_label }}" class="form-control" value="{{ form.selling_price.value|default:'' }}" required>
+                    </div>
+                    {% if form.selling_price.errors %}
+                    <div class="text-danger">{{ form.selling_price.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.received_date.id_for_label }}" class="form-label">Received Date*</label>
+                <input type="date" name="{{ form.received_date.name }}" id="{{ form.received_date.id_for_label }}" class="form-control" value="{{ form.received_date.value|date:'Y-m-d'|default:'' }}" required>
+                {% if form.received_date.errors %}
+                <div class="text-danger">{{ form.received_date.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="/" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
